@@ -1,6 +1,6 @@
 ######
 ## 22 April 2020
-## Creating CBSA Guide from U.S. Census Guidelines
+## GDP per Capita Computation and Exploration
 ######
 setwd("~/Documents/GitHub/ct-data-praxis/R Files/Data Management")
 
@@ -30,14 +30,36 @@ gdp %>%
   select(msa = GeoName, year, r.gdp.per.cap) -> graph_data
 
 ## Real GDP Per Capita:
-ggplot(data = graph_data, aes(x = year, y = r.gdp.per.cap, group = msa)) +
-  geom_line(aes(color = msa))
+graph_data %>% 
+  mutate(msa = as.character(msa)) %>% 
+  mutate(area = ifelse(msa %in% c("New York-Newark-Jersey City", "Boston-Cambridge-Newton"),
+                       "Not CT", "CT")) %>% 
+  ggplot(aes(x = year, y = r.gdp.per.cap, group = msa)) +
+    geom_line(aes(color = msa, linetype = area), size = 0.8) +
+    scale_linetype_manual(values = c("dashed", "solid")) +
+    guides(linetype = FALSE) +         
+    labs(x = "Year",
+         y = "Real GDP Per Capita",
+         title = "Real GDP Per Capita 2010-2018",
+         subtitle = "Connecticut MSA's compared to Boston and New York Metro Areas") +
+    theme_bw()
 
 ### Percentage Change:
 graph_data %>% 
+  mutate(msa = as.character(msa)) %>% 
   group_by(msa) %>% 
   arrange(msa, year) %>% 
   mutate(pct.change = ((r.gdp.per.cap - lag(r.gdp.per.cap))/lag(r.gdp.per.cap))*100) %>% 
-  ggplot(aes(x = year, y = pct.change, group = msa)) +
-  geom_line(aes(color = msa))
+  ungroup() %>% 
+  mutate(area = ifelse(msa %in% c("New York-Newark-Jersey City", "Boston-Cambridge-Newton"),
+                       msa, "Connecticut")) %>% 
+  group_by(area, year) %>% 
+  summarise(pct.change = mean(pct.change)) %>% 
+  ungroup() %>%
+  filter(year != "2010") %>% 
+  ggplot(aes(x = year, y = pct.change, group = area)) +
+  geom_line(aes(color = area)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  scale_y_continuous(limits = c(-6.5,5)) +
+  theme_bw() 
 
