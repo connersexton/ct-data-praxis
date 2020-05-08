@@ -100,30 +100,4 @@ df_summary$cluster = fit.km$cluster
 df_summary %>% 
   left_join(pop %>% select(CBSA, NAME) %>% distinct(), by = "CBSA") -> df_summary
 
-###### Machine Learning:
-
-my.lm <- lm(gdp.pcap~.-CBSA -NAME, data = joined_df)
-summary(my.lm)
-
-
-library(caret)
-set.seed(12345)
-index <- createDataPartition(joined_df$gdp.pcap, p = .7, list = FALSE)
-
-train <- joined_df[index, ]
-test <- joined_df[-index, ]
-
-### Random Forest:
-library(randomForest)
-set.seed(12345)
-fit.forest <- randomForest(gdp.pcap ~ .-CBSA-NAME, data = train,
-                           ntree = 100,
-                           importance = TRUE)
-fit.forest
-pred.forest <- predict(fit.forest, test)
-postResample(pred = pred.forest, obs = test$gdp.pcap)
-
-varImpPlot(fit.forest, type=2, main="Variable Importance")
-
-fit.forest$importance
 
