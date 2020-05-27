@@ -37,11 +37,13 @@ graph_data %>%
   ggplot(aes(x = year, y = r.gdp.per.cap, group = msa)) +
     geom_line(aes(color = msa, linetype = area), size = 0.8) +
     scale_linetype_manual(values = c("dashed", "solid")) +
+    scale_y_continuous(labels = scales::dollar)+
     guides(linetype = FALSE) +         
     labs(x = "Year",
          y = "Real GDP Per Capita",
          title = "Real GDP Per Capita 2010-2018",
-         subtitle = "Connecticut MSA's compared to Boston and New York Metro Areas") +
+         subtitle = "Connecticut MSA's compared to Boston and New York Metro Areas",
+         color = "MSA") +
     theme_bw()
 
 ### Percentage Change:
@@ -54,12 +56,17 @@ graph_data %>%
   mutate(area = ifelse(msa %in% c("New York-Newark-Jersey City", "Boston-Cambridge-Newton"),
                        msa, "Connecticut")) %>% 
   group_by(area, year) %>% 
-  summarise(pct.change = mean(pct.change)) %>% 
+  summarise(pct.change = mean(pct.change)) %>%
   ungroup() %>%
   filter(year != "2010") %>% 
   ggplot(aes(x = year, y = pct.change, group = area)) +
-  geom_line(aes(color = area)) +
+  geom_line(aes(color = area), size = 0.8) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
   scale_y_continuous(limits = c(-6.5,5)) +
-  theme_bw() 
+  theme_bw() +
+  labs(x = "Year",
+       y = "Percent Change",
+       title = "Percent Change in Real GDP Per Capita 2010-2018",
+       subtitle = "Connecticut compared to Boston and New York Metro Areas",
+       color = "Area")
 

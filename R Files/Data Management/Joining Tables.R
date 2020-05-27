@@ -1,7 +1,3 @@
-######
-## 7 May 2020
-## KNN Cluster Analysis
-######
 setwd("~/Documents/GitHub/ct-data-praxis/R Files/Data Management")
 
 library(dplyr)
@@ -60,44 +56,5 @@ pop %>%
   left_join(gdp_info, by = c("CBSA" = "cbsa", "year")) %>% 
   na.omit() -> joined_df
 
-## Cluster Analysis:
-library(factoextra)
-joined_df %>% 
-  group_by(CBSA) %>% 
-  summarise_if(is.numeric, mean) %>% 
-  select(-year) -> df_summary
-
-df_st <- scale(df_summary[2:length(df_summary)])
-set.seed(1234)
-fit.km <- kmeans(df_st, 4, nstart = 25)
-fit.km$size
-fit.km$centers
-
-# plot clusters (method 1)
-fviz_cluster(fit.km, df_st,
-             ellipse.type = "convex",#creates shaded regions for clusters
-             palette = "Set2",#color choice using rcolorbrewer
-             ggtheme = theme_minimal())#minimal theme
-means <- as.data.frame(fit.km$centers)
-means$cluster <- row.names(means)
-
-
-library(tidyr)
-dfm <- gather(means, key = "Variable", value = "Value", pop.change.p:gdp.pcap)
-
-library(ggplot2) 
-ggplot(data = dfm,
-       aes(x = Variable, y = Value, group = cluster,
-           color = cluster, shape = cluster)) + 
-  geom_point(size = 3) +
-  geom_line(size = 1) +
-  facet_wrap(.~cluster) +
-  labs(title = "Words")+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-df_summary$cluster = fit.km$cluster
-
-df_summary %>% 
-  left_join(pop %>% select(CBSA, NAME) %>% distinct(), by = "CBSA") -> df_summary
-
-
+joined_df
+write.csv(joined_df, file = "../../Data/joined_data.csv")

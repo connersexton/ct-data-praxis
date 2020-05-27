@@ -82,7 +82,7 @@ var_codes <- data.frame(variable = paste0("S2403_C01_0",
                                           c(paste0("0", c(1:2, 5, 7:9)), 12:13, 16, 20, 23), 
                                           "E"),
                         label = c("total_emp", "agri", "construction", "wholesale", "retail", "transportation",
-                                  "information", "finance", "professional", "education", "ammenities"))
+                                  "information", "finance", "professional", "education", "amenities"))
 
 var_codes %>% 
   left_join(ref %>% select(-X3) %>% filter(GEO_ID %in% vars), by = c("variable" = "GEO_ID")) %>% 
